@@ -1,39 +1,52 @@
-export interface User {
-  name: string
-  email: string
-}
+import { sign } from 'jsonwebtoken';
 
-let db = [
-  {
-    name: "Walker",
-    email: "walker.b.lobato@gmail.com"
-  }
-];
+import { UserRepository } from './../repositories/UserRepository';
+import { AppDataSource } from '../database';
+import { User } from '../entities/User';
 
 export class UserService {
-  db: User[];
+  private userRepository: UserRepository;
 
-  constructor(database = db) {
-    this.db = database;
+  constructor (
+    userRepository = new UserRepository(AppDataSource.manager)
+  ){
+    this.userRepository = userRepository;
   }
 
-  createUser = (name: string, email: string) => {
-    const user = {
-      name,
-      email
+  createUser = async (name: string, email: string, password: string): Promise<User> => {
+    const user = new User(name, email, password);
+
+    return this.userRepository.createUser(user);
+  }
+
+  getUser = async (userId: string): Promise<User | null> => {
+    return this.userRepository.getUser(userId)
+  }
+
+  getAuthenticatedUser = async (email: string, password: string): Promise<User | null> => {
+    return this.userRepository.getUserByEmailAndPassword(email, password);
+  }
+
+  getToken = async (email: string, password: string): Promise<string> => {
+    const user = await this.getAuthenticatedUser(email, password);
+
+    if(!user) {
+      throw new Error('Email/password invalid!')
+    }
+
+    const tokenKey = '123456789';
+
+    const tokenData = {
+      name: user?.name,
+      email: user?.email
     };
 
-    this.db.push(user);
-    console.log('DB atualizado', this.db);
-  }
+    const tokenOptions = {
+      subject: user?.id_user
+    }
 
-  getAllUsers = () => {
-    return this.db;
-  }
+    const token = sign(tokenData, tokenKey, tokenOptions)
 
-  deleteUser = (email: string) => {
-    const deleteUser = this.db.filter(user => user.email !== email);
-
-    this.db = deleteUser;
+    return token;
   }
 }

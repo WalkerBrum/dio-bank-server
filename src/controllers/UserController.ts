@@ -1,5 +1,5 @@
 import  { Request, Response } from 'express';
-import { UserService } from '../services/userServices';
+import { UserService } from '../services/UserServices';
 
 export class UserController {
   userService: UserService;
@@ -14,41 +14,44 @@ export class UserController {
     if(!user.name) {
       return res.status(400).json({
         message: 'Bad request! Name é obrigatório'
-      })
+      });
     }
 
     if(!user.email) {
       return res.status(400).json({
         message: 'Bad request! Email é obrigatório'
-      })
+      });
     }
 
-    this.userService.createUser(user.name, user.email);
+    if(!user.password) {
+      return res.status(400).json({
+        message: 'Bad request! Password é obrigatório'
+      });
+    }
+
+    this.userService.createUser(user.name, user.email, user.password);
   
     return res.status(201).json({
       message: 'Usuário criado'
-    })
+    });
   }
 
-  getAllUsers = (req: Request, res: Response) => {
-    const users = this.userService.getAllUsers();
-
-    return res.status(200).json(users);
+  getUser = async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const user = await this.userService.getUser(userId);
+    
+    return res.status(200).json({
+      userId: user?.id_user,
+      name: user?.name,
+      email: user?.email
+    });
   }
 
   deleteUser = (req: Request, res: Response) => {
     const user = req.body;
-
-    if(!user.email) {
-      return res.status(400).json({
-        message: 'Bad request! Email é obrigatório'
-      })
-    }
-
-    this.userService.deleteUser(user.email);
-
+    console.log('Deletando usuário...');
     return res.status(200).json({
-      message: 'Usuário deletado'
-    })
+      message: 'Usuário deletado', user
+    });
   }
 }

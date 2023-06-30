@@ -1,23 +1,32 @@
 import { Request } from 'express';
 
-import { makeMockResponse } from '../__mocks__/mockResponse.mock';
-import { UserService } from '../services/userServices';
 import { UserController } from './UserController';
+import { makeMockResponse } from '../__mocks__/mockResponse.mock';
+import { makeMockRequest } from '../__mocks__/mockRequest.mock';
+
+const mockUserService = {
+  createUser: jest.fn(),
+  getUser: jest.fn()
+}
+
+jest.mock('../services/UserServices', () => {
+  return {
+    UserService: jest.fn().mockImplementation(() => {
+      return mockUserService
+    })
+  }
+})
 
 describe('UserController', () => {
-  const mockUserService: Partial<UserService> = {
-    createUser: jest.fn(),
-    getAllUsers: jest.fn(),
-    deleteUser: jest.fn()
-  };
-
-  const userController = new UserController(mockUserService as UserService);
+  const mockResponse = makeMockResponse();
+  const userController = new UserController();
 
   it('Deve adicionar um novo usuário', () => {
     const mockRequest = { 
       body: {
         name: 'Walker',
-        email: 'walker.b.lobato@gmail.com'
+        email: 'walker.b.lobato@gmail.com',
+        password: '123456'
       } 
     } as Request;
     const mockResponse = makeMockResponse();
@@ -34,13 +43,14 @@ describe('UserController', () => {
     const mockRequest = { 
       body: {
         name: '',
-        email: 'walker.b.lobato@gmail.com'
+        email: 'walker.b.lobato@gmail.com',
+        password: '123456'
       } 
     } as Request;
-    const mockResponse = makeMockResponse();
 
     userController.createUser(mockRequest, mockResponse);
 
+    expect(mockResponse.state.status).toBe(400)
     expect(mockResponse.state.json).toMatchObject({
       message: 'Bad request! Name é obrigatório'
     });
@@ -50,56 +60,45 @@ describe('UserController', () => {
     const mockRequest = { 
       body: {
         name: 'Walker',
-        email: ''
+        email: '',
+        password: '123456'
       } 
     } as Request;
-    const mockResponse = makeMockResponse();
 
     userController.createUser(mockRequest, mockResponse);
 
+    expect(mockResponse.state.status).toBe(400)
     expect(mockResponse.state.json).toMatchObject({
       message: 'Bad request! Email é obrigatório'
     });
   })
 
-  it('Deve retornar todos os usuários', () => {
-    const mockRequest = {} as Request;
-    const mockResponse = makeMockResponse();
-
-    const response = userController.getAllUsers(mockRequest, mockResponse);
-
-    expect(mockResponse.state.status).toBe(200);
-    expect(mockResponse.json()).toMatchObject(response);
-  })
-
-  it('Deve retornar um erro caso não informe email ao deletar usuário', () => {
+  it('Deve retornar um erro caso não informe password ao criar usuário', () => {
     const mockRequest = { 
       body: {
-        name: '',
+        name: 'Walker',
+        email: 'walker.b.lobato@gmail.com',
+        password: ''
       } 
     } as Request;
-    const mockResponse = makeMockResponse();
 
-    userController.deleteUser(mockRequest, mockResponse);
+    userController.createUser(mockRequest, mockResponse);
 
+    expect(mockResponse.state.status).toBe(400)
     expect(mockResponse.state.json).toMatchObject({
-      message: 'Bad request! Email é obrigatório'
+      message: 'Bad request! Password é obrigatório'
     });
   })
 
-  it('Deve deletar um usuário', () => {
-    const mockRequest = { 
-      body: {
-        email: 'walker.b.lobato@gmail.com'
-      } 
-    } as Request;
-    const mockResponse = makeMockResponse();
+  it('Deve retornar o usuário com o userId informado', () => {
+    const mockRequest = makeMockRequest({
+      params: {
+        userId: '123456'
+      }
+    })
 
-    userController.deleteUser(mockRequest, mockResponse);
-
-    expect(mockResponse.state.status).toBe(200);
-    expect(mockResponse.state.json).toMatchObject({
-      message: 'Usuário deletado'
-    });
+    userController.getUser(mockRequest, mockResponse)
+    expect(mockUserService.getUser).toHaveBeenCalledWith('123456')
+    expect(mockResponse.state.status).toBe(200)
   })
 })
