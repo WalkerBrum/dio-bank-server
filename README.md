@@ -49,4 +49,4 @@ yarn start
 ```
 
 ## **Autor e Agradecimento**
-Eu Walker Lobato como desenvolvedor do projeto sou grato por poder participar desse teste técnico promovido pela SCF Brazil, pois foi um grande oportunidade para o desenvolvimento das minhas hard skills, aprimorando os meus conhecimentos nas tecnlogias Node.js, Express e SQL, além de aprimorar no meu desenvolvimento de APIs.
+Eu Walker Lobato como desenvolvedor do projeto sou grato por poder participar desse teste técnico promovido pela SCF Brazil, pois foi um grande oportunidade para o desenvolvimento das minhas hard skills, aprimorando os meus conhecimentos nas tecnlogias Node.js, Express e SQL, além de aprimorar no meu desenvolvimento de APIs usando testes unitários.
