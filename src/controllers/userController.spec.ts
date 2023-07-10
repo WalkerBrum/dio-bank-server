@@ -29,7 +29,6 @@ describe('UserController', () => {
         password: '123456'
       } 
     } as Request;
-    const mockResponse = makeMockResponse();
 
     userController.createUser(mockRequest, mockResponse);
 
@@ -90,14 +89,15 @@ describe('UserController', () => {
     });
   })
 
-  it('Deve retornar o usuário com o userId informado', () => {
+  it('Deve retornar o usuário com o userId informado', async () => {
     const mockRequest = makeMockRequest({
       params: {
         userId: '123456'
       }
     })
 
-    userController.getUser(mockRequest, mockResponse)
+    await userController.getUser(mockRequest, mockResponse)
+  
     expect(mockUserService.getUser).toHaveBeenCalledWith('123456')
     expect(mockResponse.state.status).toBe(200)
   })

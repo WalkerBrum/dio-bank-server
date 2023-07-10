@@ -40,18 +40,6 @@ export class UserController {
     const { userId } = req.params;
     const user = await this.userService.getUser(userId);
     
-    return res.status(200).json({
-      userId: user?.id_user,
-      name: user?.name,
-      email: user?.email
-    });
-  }
-
-  deleteUser = (req: Request, res: Response) => {
-    const user = req.body;
-    console.log('Deletando usuário...');
-    return res.status(200).json({
-      message: 'Usuário deletado', user
-    });
+    return res.status(200).json(user);
   }
 }
